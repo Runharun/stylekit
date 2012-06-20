@@ -147,7 +147,7 @@
 
       $("#element-list").append('<li class="element-container" id="item-u' + uniqueId + '"> \
                                 <div class="title-container"><label>Name</label> \
-                                <input type="text" class="title" id="title_u' + uniqueId + '" name="title" value="" /> \
+                                <input type="text" class="title" id="title_u' + uniqueId + '" name="title" value="New Element" /> \
                                 <a class="delete delete-element" href="u' + uniqueId + '">Delete</a> \
                                 </div> \
                                 <div class="markup-container"><label>Markup</label> \
@@ -178,7 +178,7 @@
 <div id="guide-options">
 <? if($loggedin) { ?>
 <a class="button delete delete-guide" href="/home/removeguide/<?=$guide['id']?>">Delete Guide</a>
-<a class="button all-guides" href="/">Back to Guide Library</a>
+<a class="button all-guides" href="/">Back to Library</a>
 <? } ?>
 </div>
 <div id="global-styles-container">
