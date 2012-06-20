@@ -27,13 +27,7 @@ class Account extends CI_Controller {
  function create()
  {
    $this->load->library('form_validation');
-
-   $data['loggedin'] = FALSE;
-
-   $this->load->view('header', $data);
    $this->load->view('newaccount');
-   $this->load->view('footer');
-
  }
 
  function verifycreate() {

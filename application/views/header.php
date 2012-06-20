@@ -4,12 +4,10 @@
 	<meta charset="utf-8">
   <title>StyleKit</title>
   <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+  <link rel="stylesheet" type="text/css" media="all" href="/screen.css" />
 </head>
 <body>
-<h1><a href="/">StyleKit</a></h1>
 <div id="container">
-<? 
-if($loggedin == true) {
-?>
-<a href="/logout">Sign Out</a>
+<?  if($loggedin == true) { ?>
+<a class="button sign-out-button" href="/logout">Sign Out</a>
 <? } ?>

@@ -30,11 +30,8 @@ class Home extends CI_Controller {
    }
    else
    {
-      $data['loggedin'] = false;
       $this->load->helper(array('form', 'url'));
-      $this->load->view('header', $data);
 		  $this->load->view('login');
-      $this->load->view('footer');
    }
   }
 
@@ -92,9 +89,7 @@ class Home extends CI_Controller {
 
         $data['account_id'] = $session_data['account_id'];
         $data['loggedin'] = true;
-        $this->load->view('header', $data);
         $this->load->view('newguide', $data);
-        $this->load->view('footer');
     } else {
       redirect('', 'refresh');
     }

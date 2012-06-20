@@ -1,17 +1,31 @@
   <script type="text/javascript" src="/jquery-ui.min.js"></script>
   <script>
     
+    //Resize Some UI Elements
+    function resizeUIElements() {
+      console.log("resize elements");
+      docH = $(document).height();
+      docW = $(document).width();
+      winH = $(window).height();
+      winW = $(window).width();
+      globalStylesW = $("#global-styles-container").width();
+      $(".global-styles-field").width(globalStylesW - 33).height(winH - 135);
+      $(".markup-container textarea, .css-container textarea").width($(".markup-container").width() - 50);
+      $(".output-container iframe").width($(".output-container").width() - 15);
+      $(".title").width($(".title-container").width() - 35);
+    }
+
     var inQueue = false;
     function updateElement(element) {
       if(element) {
         elementContainer = $("#item-" + element);
-        outputHTML = elementContainer.children(".markup").val();
-        outputCSS = elementContainer.children(".css").val();
-        outputTitle = elementContainer.children(".title").val();
+        outputHTML = elementContainer.find(".markup").val();
+        outputCSS = elementContainer.find(".css").val();
+        outputTitle = elementContainer.find(".title").val();
         outputGlobal = $(".global-styles").val();
-        elementContainer.children("#element_" + element).contents().find(".global-style").html(outputGlobal);
-        elementContainer.children("#element_" + element).contents().find(".output").html(outputHTML);
-        elementContainer.children("#element_" + element).contents().find(".style").html(outputCSS);
+        elementContainer.find("#element_" + element).contents().find(".global-style").html(outputGlobal);
+        elementContainer.find("#element_" + element).contents().find(".output").html(outputHTML);
+        elementContainer.find("#element_" + element).contents().find(".style").html(outputCSS);
         var dataString = 'title=' + outputTitle + '&markup=' + outputHTML + '&css=' + outputCSS;
         $.ajax({
           type: 'POST',
@@ -21,15 +35,16 @@
         });
       } else {
         $(".element-container").each(function() {
-          outputHTML = $(this).children(".markup").val();
-          outputCSS = $(this).children(".css").val();
+          outputHTML = $(this).find(".markup").val();
+          outputCSS = $(this).find(".css").val();
           outputGlobal = $(".global-styles").val();
-          $(this).children(".output").contents().find(".global-style").html(outputGlobal);
-          $(this).children(".output").contents().find(".output").html(outputHTML);
-          $(this).children(".output").contents().find(".style").html(outputCSS);
-          $(this).children(".output").fadeIn();
+          $(this).find(".output").contents().find(".global-style").html(outputGlobal);
+          $(this).find(".output").contents().find(".output").html(outputHTML);
+          $(this).find(".output").contents().find(".style").html(outputCSS);
+          $(this).find(".output").fadeIn();
         });
       }
+      
     };
     $(function() {
       $(".markup").live('keyup',function() {
@@ -104,6 +119,14 @@
         $("textarea").attr("disabled", "disabled");
         $("input").attr("disabled", "disabled");
       }
+
+
+      $(window).resize(function() {
+        resizeUIElements();
+      });
+
+      resizeUIElements();
+
     });
     setTimeout(function(){updateElement()}, 1000);
 
@@ -123,15 +146,24 @@
       $("#ajaxContainer").load("/element/newelement/" + guideId + "/u" + uniqueId);
 
       $("#element-list").append('<li class="element-container" id="item-u' + uniqueId + '"> \
-                                <input type="text" id="title_u' + uniqueId + '" class="title" value="New Element" /> \
-                                <textarea class="markup" id="markup_u' + uniqueId + '"></textarea> \
-                                <textarea class="css" id="css_u' + uniqueId + '"></textarea> \
-                                <iframe class="output" style="display: inline" src="/output.html" id="element_u' + uniqueId + '"></iframe> \
+                                <div class="title-container"><label>Name</label> \
+                                <input type="text" class="title" id="title_u' + uniqueId + '" name="title" value="" /> \
                                 <a class="delete delete-element" href="u' + uniqueId + '">Delete</a> \
+                                </div> \
+                                <div class="markup-container"><label>Markup</label> \
+                                <textarea class="markup" id="markup_u' + uniqueId + '"></textarea> \
+                                </div> \
+                                <div class="css-container"><label>CSS</label> \
+                                <textarea class="css" id="css_u' + uniqueId + '"></textarea> \
+                                </div> \
+                                <div class="output-container"><label>Output</label> \
+                                <iframe class="output" style="display: inline" src="/output.html" id="element_u' + uniqueId + '"></iframe> \
+                                </div> \
                                 </li>');
       outputGlobal = $(".global-styles").val();
       
-      setTimeout(function(){ $("#item-u" + uniqueId).children(".output").contents().find(".global-style").html(outputGlobal); }, 200);
+      setTimeout(function(){ $("#item-u" + uniqueId).find(".output").contents().find(".global-style").html(outputGlobal); }, 200);
+      resizeUIElements();
     }
     function deleteElement(uniqueId) {
       $("#ajaxContainer").load("/element/removeelement/" + uniqueId);
@@ -142,27 +174,43 @@
     .output { display: none; }
 	</style>
 <?php foreach ($guide as $guide): ?>
-<h1><?=$guide['title']?></h1>
+<h1 class="guide-title"><?=$guide['title']?> Style Guide</h1>
+<div id="guide-options">
 <? if($loggedin) { ?>
-<a class="delete delete-guide" href="/home/removeguide/<?=$guide['id']?>">Delete Guide</a>
+<a class="button delete delete-guide" href="/home/removeguide/<?=$guide['id']?>">Delete Guide</a>
+<a class="button all-guides" href="/">Back to Guide Library</a>
 <? } ?>
-<textarea id="guide_<?=$this->uri->segment(2)?>" class="global-styles"><?=$guide['global_styles']?></textarea>
+</div>
+<div id="global-styles-container">
+  <h2>Global</h2>
+  <textarea id="guide_<?=$this->uri->segment(2)?>" class="global-styles-field global-styles"><?=$guide['global_styles']?></textarea>
+</div>
 <?php endforeach ?>
+<div id="element-list-container">
+  <h2>Elements</h2>
 <ul id="element-list">
 <?php foreach ($elements as $element): ?>
   <li class="element-container" id="item-<?=$element['unique_id']?>">
-    <input type="text" class="title" id="title_<?=$element['unique_id']?>" name="title" value="<?=$element['title'] ?>" />
-    <textarea class="markup" name="markup" id="markup_<?=$element['unique_id']?>"><?=htmlentities($element['markup'])?></textarea>
-    <textarea class="css" name="css" id="css_<?=$element['unique_id']?>"><?=$element['css']?></textarea>
-    <iframe class="output" src="/output.html" id="element_<?=$element['unique_id']?>"></iframe>
-    <? if($loggedin) { ?>
-      <a class="delete delete-element" href="<?=$element['unique_id']?>">Delete</a>
-    <? } ?>
-    <hr />
+    <div class="title-container"><label>Name</label>
+      <input type="text" class="title" id="title_<?=$element['unique_id']?>" name="title" value="<?=$element['title'] ?>" />
+      <? if($loggedin) { ?>
+        <a class="delete delete-element" href="<?=$element['unique_id']?>">Delete</a>
+      <? } ?>
+    </div>
+    <div class="markup-container"><label>Markup</label>
+      <textarea class="markup" name="markup" id="markup_<?=$element['unique_id']?>"><?=htmlentities($element['markup'])?></textarea>
+    </div>
+    <div class="css-container"><label>CSS</label>
+      <textarea class="css" name="css" id="css_<?=$element['unique_id']?>"><?=$element['css']?></textarea>
+    </div>
+    <div class="output-container"><label>Output</label>
+      <iframe class="output" src="/output.html" id="element_<?=$element['unique_id']?>"></iframe>
+    </div>
   </li>
 <?php endforeach ?>
 </ul>
 <? if($loggedin) { ?>
-  <a href="javascript:newElement('<?=$guide['id']?>')">New Element</a>
+  <a class="button new-element-button" href="javascript:newElement('<?=$guide['id']?>')">New Element</a>
 <? } ?>
+</div>
 <div id="ajaxContainer"></div>

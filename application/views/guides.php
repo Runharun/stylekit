@@ -10,6 +10,8 @@
 <body>
 
 <div id="container">
+<h1 class="guide-title"><strong class="app-title">StyleKit</strong> Guide Library</h1>
+<div id="guides-container">
 
 <?php foreach ($guides as $guide): ?>
 
@@ -19,8 +21,9 @@
 
 <?php endforeach ?>
 
-<a href="/newguide">New Guide</a>
+<a class="guide-container new-guide" href="/newguide"><strong>+</strong>New Guide</a>
 
+</div>
 </div>
 
 </body>
