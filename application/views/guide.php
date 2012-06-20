@@ -182,7 +182,7 @@
 <? } ?>
 </div>
 <div id="global-styles-container">
-  <h2>Global</h2>
+  <h2>Global CSS</h2>
   <textarea id="guide_<?=$this->uri->segment(2)?>" class="global-styles-field global-styles"><?=$guide['global_styles']?></textarea>
 </div>
 <?php endforeach ?>
