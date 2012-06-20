@@ -1,15 +1,22 @@
+<? if($loggedin) { ?>
+<style>
+.CodeMirror-focused pre.CodeMirror-cursor {
+  visibility: visible !important;
+}
+</style>
+<? } ?>
   <script type="text/javascript" src="/jquery-ui.min.js"></script>
   <script>
     
     //Resize Some UI Elements
     function resizeUIElements() {
-      console.log("resize elements");
       docH = $(document).height();
       docW = $(document).width();
       winH = $(window).height();
       winW = $(window).width();
       globalStylesW = $("#global-styles-container").width();
-      $(".global-styles-field").width(globalStylesW - 33).height(winH - 135);
+      $(".CodeMirror").height(winH - 110);
+      $(".CodeMirror-gutter").height(winH - 110);
       $(".markup-container textarea, .css-container textarea").width($(".markup-container").width() - 50);
       $(".output-container iframe").width($(".output-container").width() - 15);
       $(".title").width($(".title-container").width() - 35);
@@ -35,6 +42,7 @@
         });
       } else {
         $(".element-container").each(function() {
+          elementID = $(this).attr("id").replace("item-","");
           outputHTML = $(this).find(".markup").val();
           outputCSS = $(this).find(".css").val();
           outputGlobal = $(".global-styles").val();
@@ -47,40 +55,23 @@
       
     };
     $(function() {
-      $(".markup").live('keyup',function() {
-        markupElementId = $(this).attr("id").replace("markup_","");
-        updateElement(markupElementId);
+      $(".element-container").each(function() {
+        elementID = $(this).attr("id").replace("item-u","");
+        initEditor(elementID, "markup");
+        initEditor(elementID, "css");
       });
       $(".title").live('keyup',function(){
         titleElementId = $(this).attr("id").replace("title_","");
         updateElement(titleElementId);
       });
-      $(".css").live('keyup',function() {
-        cssElementId = $(this).attr("id").replace("css_","");
-        updateElement(cssElementId);
-      });
-
-      $(".global-styles").live('keyup',function() {
-        style_output = $(this).val();
-        guide_id = $(this).attr("id").replace("guide_","");
-        var dataString = 'global_styles=' + style_output;
-        $.ajax({
-          type: 'POST',
-          url: '/home/update_global_styles/' + guide_id,
-          data: dataString,
-          success: function() {  }
-        });
-        $(".output").each(function() {
-          $(this).contents().find(".global-style").html(style_output);
-        });
-      });
 
       $(".delete").live("click", function(e) {
         e.preventDefault();
-        $(this).html("Confirm Delete");
+        $(this).html("Really Delete");
       });
       $(".delete-element").live("click", function(e) {
         e.preventDefault();
+        $(this).after('<a class="cancel-delete-element" href="">Cancel</a>');
         if($(this).hasClass("confirm-delete-element")) {
           deleteElement($(this).attr("href"));
         } else {
@@ -89,13 +80,26 @@
       });
       $(".delete-guide").click(function(e) {
         e.preventDefault();
+        $(this).after('<a class="cancel-delete-guide" href="">Cancel</a>');
         if($(this).hasClass("confirm-delete-guide")) {
           window.location = $(this).attr("href");
         } else {
           $(this).addClass("confirm-delete-guide");
         }
       });
+      $(".cancel-delete-element").live("click", function(e) {
+        e.preventDefault();
+        $(this).remove();
+        $(".delete-element").html("Delete").removeClass("confirm-delete-element");
+      });
+      $(".cancel-delete-guide").live("click", function(e) {
+        e.preventDefault();
+        $(this).remove();
+        $(".delete-guide").html("Delete Guide").removeClass("confirm-delete-guide");
+      });
 
+
+      <? if($loggedin) { ?>
       $('#element-list').sortable({
         opacity: '0.5',
         cursor: 'move', 
@@ -114,7 +118,8 @@
               }
             });
           }
-        });
+      });
+<? } ?>
       if('<?=$loggedin?>' == '') {
         $("textarea").attr("disabled", "disabled");
         $("input").attr("disabled", "disabled");
@@ -164,11 +169,15 @@
       
       setTimeout(function(){ $("#item-u" + uniqueId).find(".output").contents().find(".global-style").html(outputGlobal); }, 200);
       resizeUIElements();
+      initEditor(uniqueId, "markup");
+      initEditor(uniqueId, "css");
     }
     function deleteElement(uniqueId) {
       $("#ajaxContainer").load("/element/removeelement/" + uniqueId);
       $("#item-" + uniqueId).fadeOut().remove();
     };
+
+
   </script>
 	<style>
     .output { display: none; }
@@ -214,3 +223,43 @@
 <? } ?>
 </div>
 <div id="ajaxContainer"></div>
+<script>
+var globalEditor = CodeMirror.fromTextArea(document.getElementById("guide_<?=$this->uri->segment(2)?>"), {
+  mode: "text/css",
+  lineNumbers: true,
+  lineWrapping: false,
+  tabSize: 2,
+  onCursorActivity: function() {
+    guide_id = "<?=$this->uri->segment(2)?>";
+    var dataString = 'global_styles=' + globalEditor.getValue();
+    $.ajax({
+      type: 'POST',
+      url: '/home/update_global_styles/' + guide_id,
+      data: dataString,
+      success: function() {  }
+    });
+    $(".output").each(function() {
+      $(this).contents().find(".global-style").html(globalEditor.getValue());
+    });
+  }
+});
+    function initEditor(elementID, field) {
+      console.log(field + "_u" + elementID);
+      if(field == "markup") {
+        modeis = "text/html";
+      } else {
+        modeis = "text/css";
+      }
+      var editor = CodeMirror.fromTextArea(document.getElementById(field + '_u' + elementID), {
+        mode: "text/css",
+        lineNumbers: true,
+        lineWrapping: false,
+        tabSize: 2,
+        onCursorActivity: function() {
+          $("#" + field + "_u" + elementID).html(editor.getValue());
+          updateElement("u" + elementID);
+        }
+      });
+    }
+
+</script>
