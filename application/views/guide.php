@@ -23,6 +23,8 @@
     }
 
     var inQueue = false;
+
+    // Update various element views
     function updateElement(element) {
       if(element) {
         elementContainer = $("#item-" + element);
@@ -54,6 +56,8 @@
       }
       
     };
+
+    // Intialize editors on top of textareas
     $(function() {
       $(".element-container").each(function() {
         elementID = $(this).attr("id").replace("item-u","");
@@ -98,7 +102,7 @@
         $(".delete-guide").html("Delete Guide").removeClass("confirm-delete-guide");
       });
 
-
+      // Make element list sortable
       <? if($loggedin) { ?>
       $('#element-list').sortable({
         opacity: '0.5',
@@ -135,6 +139,7 @@
     });
     setTimeout(function(){updateElement()}, 1000);
 
+    // Create random unique IDs for elements
     function randomString() {
     	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
     	var string_length = 60;
@@ -146,6 +151,7 @@
     	return randomstring;
     }
 
+    // Build new element row
     function newElement(guideId) {
       uniqueId = randomString();
       $("#ajaxContainer").load("/element/newelement/" + guideId + "/u" + uniqueId);
@@ -224,6 +230,8 @@
 </div>
 <div id="ajaxContainer"></div>
 <script>
+
+// Initialize global editor
 var globalEditor = CodeMirror.fromTextArea(document.getElementById("guide_<?=$this->uri->segment(2)?>"), {
   mode: "text/css",
   lineNumbers: true,
@@ -238,11 +246,14 @@ var globalEditor = CodeMirror.fromTextArea(document.getElementById("guide_<?=$th
       data: dataString,
       success: function() {  }
     });
+    $(".global-styles").html(globalEditor.getValue());
     $(".output").each(function() {
       $(this).contents().find(".global-style").html(globalEditor.getValue());
     });
   }
 });
+
+// Function to initialize code editors
     function initEditor(elementID, field) {
       console.log(field + "_u" + elementID);
       if(field == "markup") {
